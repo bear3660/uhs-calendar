@@ -1,0 +1,36 @@
+name: Update Calendar
+
+on:
+  schedule:
+    - cron: '0 17 * * *' # 매일 새벽 2시(한국시간 기준)에 자동 실행
+  workflow_dispatch: # 우리가 원할 때 언제든 버튼을 눌러 수동으로 실행하는 기능
+
+permissions:
+  contents: write # 로봇이 캘린더 파일을 깃허브 방에 저장할 수 있도록 허락해주는 권한
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 내 저장소 파일 가져오기
+      uses: actions/checkout@v3
+
+    - name: 파이썬 설치하기
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 도구 상자 설치하기
+      run: pip install -r requirements.txt
+
+    - name: 로봇 코드 실행하기
+      run: python main.py
+
+    - name: 만들어진 ics 파일 방에 저장하기
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add academic_calendar.ics
+        git commit -m "Update calendar" || echo "No changes to commit"
+        git push
