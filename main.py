@@ -18,7 +18,6 @@ cal.add('x-wr-timezone', 'Asia/Seoul')
 KST = pytz.timezone('Asia/Seoul')
 current_year = datetime.now().year
 
-# 💡 이 부분이 핵심입니다! 올해 1~12월 + 내년 1~2월까지만 딱 14번만 가도록 제한을 걸었습니다.
 target_periods = []
 for m in range(1, 13):
     target_periods.append((current_year, m))
@@ -35,6 +34,9 @@ headers = {
 }
 
 session = requests.Session()
+
+# 💡 캘린더 일정이 여러 달에 걸쳐 중복으로 등록되는 것을 막는 메모장입니다.
+added_events = set()
 
 for year, month in target_periods:
     payload = {
@@ -66,11 +68,17 @@ for year, month in target_periods:
                 if dates and event_text:
                     try:
                         start_month, start_day = int(dates[0][0]), int(dates[0][1])
-                        start_date = datetime(year, start_month, start_day, tzinfo=KST)
+                        
+                        # 💡 핵심 버그 수정: 1~2월 달력에서 11~12월 일정을 발견하면 무조건 작년으로 뺍니다!
+                        start_year = year
+                        if month <= 2 and start_month >= 11:
+                            start_year = year - 1
+                            
+                        start_date = datetime(start_year, start_month, start_day, tzinfo=KST)
                         
                         if len(dates) > 1:
                             end_month, end_day = int(dates[1][0]), int(dates[1][1])
-                            end_year = year
+                            end_year = start_year
                             
                             if end_month < start_month:
                                 end_year += 1
@@ -78,6 +86,12 @@ for year, month in target_periods:
                             end_date = datetime(end_year, end_month, end_day, tzinfo=KST) + timedelta(days=1)
                         else:
                             end_date = start_date + timedelta(days=1)
+                            
+                        # 💡 중복 검사: 이미 달력에 넣은 일정이면 건너뜁니다.
+                        event_key = f"{event_text}_{start_date.strftime('%Y%m%d')}"
+                        if event_key in added_events:
+                            continue
+                        added_events.add(event_key)
                             
                         event = Event()
                         event.add('summary', event_text)
