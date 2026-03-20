@@ -2,14 +2,15 @@ name: Update Calendar
 
 on:
   schedule:
-    - cron: '0 17 * * *' # 매일 새벽 2시(한국시간 기준)에 자동 실행
-  workflow_dispatch: # 우리가 원할 때 언제든 버튼을 눌러 수동으로 실행하는 기능
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+
+# 💡 이 부분이 새 엔진(Node.js 24)을 강제로 쓰게 만드는 스위치입니다.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
-  contents: write # 로봇이 캘린더 파일을 깃허브 방에 저장할 수 있도록 허락해주는 권한
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  
+  contents: write
 
 jobs:
   build:
