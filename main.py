@@ -18,12 +18,12 @@ cal.add('x-wr-timezone', 'Asia/Seoul')
 KST = pytz.timezone('Asia/Seoul')
 current_year = datetime.now().year
 
-# 💡 핵심 수정: 올해 1~12월과 내년 1~2월까지만 명확하게 리스트로 묶어줍니다.
+# 💡 이 부분이 핵심입니다! 올해 1~12월 + 내년 1~2월까지만 딱 14번만 가도록 제한을 걸었습니다.
 target_periods = []
 for m in range(1, 13):
-    target_periods.append((current_year, m))  # 올해 1월~12월
+    target_periods.append((current_year, m))
 for m in range(1, 3):
-    target_periods.append((current_year + 1, m)) # 내년 1월~2월
+    target_periods.append((current_year + 1, m))
 
 url = "https://www.uhs.ac.kr/uhs/121/subview.do?enc=Zm5jdDF8QEB8JTJGc2NoZHVsbWFuYWdlJTJGdWhzJTJGMSUyRnZpZXcuZG8lM0Y%3D"
 headers = {
@@ -36,7 +36,6 @@ headers = {
 
 session = requests.Session()
 
-# 💡 target_periods에 담긴 14개의 '연도-월' 조합만 딱 맞춰서 반복합니다.
 for year, month in target_periods:
     payload = {
         'year': str(year),
